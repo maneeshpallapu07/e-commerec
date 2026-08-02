@@ -11,9 +11,8 @@ db = pymysql.connect(
     database="order_db"
 )
 
-USER_SERVICE = "http://54.79.93.183:5000"
-PRODUCT_SERVICE = "http://54.79.93.183:5001"
-
+USER_SERVICE = "http://user-service:5000"
+PRODUCT_SERVICE = "http://product-service:5001"
 
 @app.route("/health")
 def health():
