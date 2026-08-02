@@ -4,16 +4,16 @@ import requests
 
 app = Flask(__name__)
 
+import os
+
 db = pymysql.connect(
-    host="database-1.c9o8eugeq7eq.ap-southeast-2.rds.amazonaws.com",
-    user="admin",
-    password="db2develop123",
-    database="order_db"
+    host=os.getenv("DB_HOST"),
+    user=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD"),
+    database=os.getenv("DB_NAME")
 )
-
-USER_SERVICE = "http://user-service:5000"
-PRODUCT_SERVICE = "http://product-service:5001"
-
+USER_SERVICE = os.getenv("USER_SERVICE_URL")
+PRODUCT_SERVICE = os.getenv("PRODUCT_SERVICE_URL")
 @app.route("/health")
 def health():
     return jsonify({

@@ -3,13 +3,14 @@ import pymysql
 
 app = Flask(__name__)
 
-db = pymysql.connect(
-    host="database-1.c9o8eugeq7eq.ap-southeast-2.rds.amazonaws.com",
-    user="admin",
-    password="db2develop123",
-    database="product_db"
-)
+import os
 
+db = pymysql.connect(
+    host=os.getenv("DB_HOST"),
+    user=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD"),
+    database=os.getenv("DB_NAME")
+)
 
 @app.route("/health", methods=["GET"])
 def health():
