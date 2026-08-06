@@ -1,18 +1,23 @@
 from flask import Flask, request, jsonify
 import pymysql
+import os
 
 app = Flask(__name__)
 
-import os
 
-db = pymysql.connect(
-    host=os.getenv("DB_HOST"),
-    user=os.getenv("DB_USER"),
-    password=os.getenv("DB_PASSWORD"),
-    database=os.getenv("DB_NAME")
-)
+def get_db_connection():
+
+    return pymysql.connect(
+        host=os.getenv("DB_HOST"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        database=os.getenv("DB_NAME")
+    )
+
+
 @app.route("/health", methods=["GET"])
 def health():
+
     return jsonify({
         "status": "UP"
     })
@@ -27,6 +32,7 @@ def create_user():
     email = data["email"]
     city = data["city"]
 
+    db = get_db_connection()
     cursor = db.cursor()
 
     cursor.execute(
@@ -39,6 +45,9 @@ def create_user():
 
     db.commit()
 
+    cursor.close()
+    db.close()
+
     return jsonify({
         "message": "User Created Successfully"
     })
@@ -47,6 +56,7 @@ def create_user():
 @app.route("/users", methods=["GET"])
 def get_users():
 
+    db = get_db_connection()
     cursor = db.cursor()
 
     cursor.execute(
@@ -58,6 +68,7 @@ def get_users():
     result = []
 
     for row in rows:
+
         result.append({
             "id": row[0],
             "name": row[1],
@@ -65,12 +76,16 @@ def get_users():
             "city": row[3]
         })
 
+    cursor.close()
+    db.close()
+
     return jsonify(result)
 
 
 @app.route("/users/<int:user_id>", methods=["GET"])
 def get_user(user_id):
 
+    db = get_db_connection()
     cursor = db.cursor()
 
     cursor.execute(
@@ -82,6 +97,9 @@ def get_user(user_id):
     )
 
     user = cursor.fetchone()
+
+    cursor.close()
+    db.close()
 
     if not user:
         return jsonify({
@@ -99,6 +117,7 @@ def get_user(user_id):
 @app.route("/users/<int:user_id>", methods=["DELETE"])
 def delete_user(user_id):
 
+    db = get_db_connection()
     cursor = db.cursor()
 
     cursor.execute(
@@ -110,6 +129,9 @@ def delete_user(user_id):
     )
 
     db.commit()
+
+    cursor.close()
+    db.close()
 
     return jsonify({
         "message": "User Deleted Successfully"
