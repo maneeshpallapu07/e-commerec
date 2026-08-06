@@ -1,19 +1,23 @@
 from flask import Flask, request, jsonify
 import pymysql
+import os
 
 app = Flask(__name__)
 
-import os
 
-db = pymysql.connect(
-    host=os.getenv("DB_HOST"),
-    user=os.getenv("DB_USER"),
-    password=os.getenv("DB_PASSWORD"),
-    database=os.getenv("DB_NAME")
-)
+def get_db_connection():
+
+    return pymysql.connect(
+        host=os.getenv("DB_HOST"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        database=os.getenv("DB_NAME")
+    )
+
 
 @app.route("/health", methods=["GET"])
 def health():
+
     return jsonify({
         "status": "UP"
     })
@@ -22,6 +26,7 @@ def health():
 @app.route("/products", methods=["GET"])
 def get_products():
 
+    db = get_db_connection()
     cursor = db.cursor()
 
     cursor.execute(
@@ -33,6 +38,7 @@ def get_products():
     result = []
 
     for row in rows:
+
         result.append({
             "id": row[0],
             "product_name": row[1],
@@ -40,12 +46,16 @@ def get_products():
             "quantity": row[3]
         })
 
+    cursor.close()
+    db.close()
+
     return jsonify(result)
 
 
 @app.route("/products/<int:product_id>", methods=["GET"])
 def get_product(product_id):
 
+    db = get_db_connection()
     cursor = db.cursor()
 
     cursor.execute(
@@ -57,6 +67,9 @@ def get_product(product_id):
     )
 
     product = cursor.fetchone()
+
+    cursor.close()
+    db.close()
 
     if not product:
         return jsonify({
@@ -80,6 +93,7 @@ def create_product():
     price = data["price"]
     quantity = data["quantity"]
 
+    db = get_db_connection()
     cursor = db.cursor()
 
     cursor.execute(
@@ -92,6 +106,9 @@ def create_product():
 
     db.commit()
 
+    cursor.close()
+    db.close()
+
     return jsonify({
         "message": "Product Created Successfully"
     })
@@ -100,6 +117,7 @@ def create_product():
 @app.route("/products/<int:product_id>", methods=["DELETE"])
 def delete_product(product_id):
 
+    db = get_db_connection()
     cursor = db.cursor()
 
     cursor.execute(
@@ -111,6 +129,9 @@ def delete_product(product_id):
     )
 
     db.commit()
+
+    cursor.close()
+    db.close()
 
     return jsonify({
         "message": "Product Deleted Successfully"
