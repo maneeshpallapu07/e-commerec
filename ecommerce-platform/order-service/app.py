@@ -57,6 +57,39 @@ def get_orders():
     return jsonify(result)
 
 
+@app.route("/orders/<int:order_id>", methods=["GET"])
+def get_order(order_id):
+
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    cursor.execute(
+        """
+        SELECT * FROM orders
+        WHERE id=%s
+        """,
+        (order_id,)
+    )
+
+    order = cursor.fetchone()
+
+    cursor.close()
+    db.close()
+
+    if not order:
+
+        return jsonify({
+            "message": "Order Not Found"
+        }), 404
+
+    return jsonify({
+        "id": order[0],
+        "user_id": order[1],
+        "product_id": order[2],
+        "quantity": order[3]
+    })
+
+
 @app.route("/orders", methods=["POST"])
 def create_order():
 
@@ -107,38 +140,6 @@ def create_order():
     })
 
 
-@app.route("/orders/<int:order_id>", methods=["GET"])
-def get_order(order_id):
-
-    db = get_db_connection()
-    cursor = db.cursor()
-
-    cursor.execute(
-        """
-        SELECT * FROM orders
-        WHERE id=%s
-        """,
-        (order_id,)
-    )
-
-    order = cursor.fetchone()
-
-    cursor.close()
-    db.close()
-
-    if not order:
-        return jsonify({
-            "message": "Order Not Found"
-        }), 404
-
-    return jsonify({
-        "id": order[0],
-        "user_id": order[1],
-        "product_id": order[2],
-        "quantity": order[3]
-    })
-
-
 @app.route("/orders/<int:order_id>", methods=["DELETE"])
 def delete_order(order_id):
 
@@ -147,3 +148,25 @@ def delete_order(order_id):
 
     cursor.execute(
         """
+        DELETE FROM orders
+        WHERE id=%s
+        """,
+        (order_id,)
+    )
+
+    db.commit()
+
+    cursor.close()
+    db.close()
+
+    return jsonify({
+        "message": "Order Deleted Successfully"
+    })
+
+
+if __name__ == "__main__":
+    app.run(
+        host="0.0.0.0",
+        port=5002,
+        debug=True
+    )

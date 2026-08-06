@@ -1,0 +1,34 @@
+userService:
+  namespace: ecommerce
+
+  replicaCount: 1
+
+  image:
+    repository: maneeshdock/user-service
+    tag: v1
+
+  containerPort: 5000
+
+
+productService:
+  namespace: ecommerce
+
+  replicaCount: 1
+
+  image:
+    repository: maneeshdock/product-service
+    tag: v1
+
+  containerPort: 5001
+
+
+orderService:
+  namespace: ecommerce
+
+  replicaCount: 1
+
+  image:
+    repository: maneeshdock/order-service
+    tag: v1
+
+  containerPort: 5002

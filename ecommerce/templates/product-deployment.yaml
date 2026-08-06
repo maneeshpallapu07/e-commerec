@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: product-service
+  namespace: {{ .Values.productService.namespace }}
+
+spec:
+  replicas: {{ .Values.productService.replicaCount }}
+
+  selector:
+    matchLabels:
+      app: product-service
+
+  template:
+    metadata:
+      labels:
+        app: product-service
+
+    spec:
+      containers:
+
+      - name: product-service
+
+        image: "{{ .Values.productService.image.repository }}:{{ .Values.productService.image.tag }}"
+
+        ports:
+        - containerPort: {{ .Values.productService.containerPort }}
+
+        env:
+
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: product-config
+              key: DB_HOST
+
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: product-config
+              key: DB_NAME
+
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: product-secret
+              key: DB_USER
+
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: product-secret
+              key: DB_PASSWORD
